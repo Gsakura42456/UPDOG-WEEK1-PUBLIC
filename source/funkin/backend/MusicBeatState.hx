@@ -8,6 +8,12 @@ import flixel.FlxG;
 import flixel.addons.transition.FlxTransitionableState;
 import funkin.data.*;
 import funkin.data.scripts.*;
+#if mobile
+import mobile.MobileControls;
+import flixel.FlxCamera;
+import flixel.input.actions.FlxActionInput;
+import flixel.util.FlxDestroyUtil;
+#end
 
 class MusicBeatState extends FlxUIState
 {
@@ -80,6 +86,56 @@ class MusicBeatState extends FlxUIState
 	}
 
 	inline function get_controls():Controls return PlayerSettings.player1.controls;
+	
+	#if mobile
+var mobileControls:MobileControls;
+var trackedInputsMobileControls:Array<FlxActionInput> = [];
+
+public function addMobileControls()
+{
+	if (mobileControls != null)
+		removeMobileControls();
+
+	mobileControls = new MobileControls();
+
+	controls.setHitBox(mobileControls.hitbox);
+
+	trackedInputsMobileControls = controls.trackedInputsNOTES;
+	controls.trackedInputsNOTES = [];
+
+	var camControls:FlxCamera = new FlxCamera();
+	FlxG.cameras.add(camControls, false);
+	camControls.bgColor.alpha = 0;
+
+	mobileControls.cameras = [camControls];
+	mobileControls.visible = false;
+	add(mobileControls);
+}
+
+public function removeMobileControls()
+{
+	if (trackedInputsMobileControls.length > 0)
+		controls.removeVirtualControlsInput(trackedInputsMobileControls);
+
+	if (mobileControls != null)
+		remove(mobileControls);
+}
+
+override function destroy()
+{
+	#if mobile
+	if (trackedInputsMobileControls.length > 0)
+		controls.removeVirtualControlsInput(trackedInputsMobileControls);
+	#end
+
+	super.destroy();
+
+	#if mobile
+	if (mobileControls != null)
+		mobileControls = FlxDestroyUtil.destroy(mobileControls);
+	#end
+}
+#end
 
 	override function create()
 	{

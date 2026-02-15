@@ -7,6 +7,11 @@ import flixel.FlxState;
 import openfl.Lib;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
+import haxe.io.Path;
+#if android
+import android.content.Context;
+import android.os.Build;
+#end
 
 class Main extends Sprite
 {
@@ -40,6 +45,11 @@ class Main extends Sprite
 	{
 		super();
 
+		#if android
+		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
+		#end
+
+
 		ClientPrefs.loadDefaultKeys();
 
 		final game = new
@@ -60,7 +70,6 @@ class Main extends Sprite
 		game._customSoundTray = funkin.objects.FunkinSoundTray;
 		addChild(game);
 
-		#if !mobile
 		fpsVar = new DebugDisplay(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
@@ -69,8 +78,7 @@ class Main extends Sprite
 		{
 			fpsVar.visible = ClientPrefs.showFPS;
 		}
-		#end
-
+		
 		#if html5
 		FlxG.autoPause = false;
 		FlxG.mouse.visible = false;
